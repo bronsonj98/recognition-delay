@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "The Label Is Not the Disease: Recognition Delay in Diagnosis Codes and Its Cost to EHR Case Finding (analysis code)"
+authors:
+  - family-names: Jeong
+    given-names: Moonseong
+  - family-names: Anand
+    given-names: Prateek
+  - family-names: Lee
+    given-names: Simon A.
+  - family-names: Han
+    given-names: Sungjoo
+  - family-names: Liu
+    given-names: Zhengtong
+  - family-names: Sankararaman
+    given-names: Sriram
+preferred-citation:
+  type: conference-paper
+  title: "The Label Is Not the Disease: Recognition Delay in Diagnosis Codes and Its Cost to EHR Case Finding"
+  authors:
+    - family-names: Jeong
+      given-names: Moonseong
+    - family-names: Anand
+      given-names: Prateek
+    - family-names: Lee
+      given-names: Simon A.
+    - family-names: Han
+      given-names: Sungjoo
+    - family-names: Liu
+      given-names: Zhengtong
+    - family-names: Sankararaman
+      given-names: Sriram
+  collection-title: "Proceedings of the Machine Learning for Health Symposium"
+  publisher:
+    name: "PMLR"
+  volume: 346
+  year: 2026

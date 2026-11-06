@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+# never commit participant-level data or model outputs
+*.parquet
+*.npy
+*.npz
+*.pkl
+*.joblib
