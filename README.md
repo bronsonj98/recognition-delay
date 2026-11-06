@@ -100,10 +100,10 @@ Summaries are written to `$ANALYSIS_WORK_ROOT/summaries`, and the figures and La
 | `describe_recognition.py` | Recording at enrollment, cumulative recognition, follow-up testing after enrollment, the enrollment value at first recognition, and persistence at the repeat assessment. | Table 2; Figure 2A, B; Tables 3, 4, 14, 15 |
 | `compare_groups.py` | Five-year recognition by group, paired differences, severity by group, participants at risk, and Fine–Gray models (`severity_models.R`). | Figure 2D; Tables 7, 9, 10, 11 |
 | `fit_models.py` | Fits the recorded, combined, measured, and incident-label models, the 115-column models, the recording propensity, and the positive–unlabeled (PU) correction. | Sections 2.4, 2.5; Appendices B, C |
-| `evaluate_models.py` | Case-finding yield, paired bootstrap comparisons, AUROC against both targets, recall by group, and propensity validation. | Figures 2C, 3, 4, 5; Tables 8, 12, 16, 19, 23–26 |
-| `sensitivity_inputs.py` | Anemia definitions without hemoglobinopathy codes, second abnormal values, and mean corpuscular volume. | Tables 5, 13, 27 |
+| `evaluate_models.py` | Case-finding yield, paired bootstrap comparisons, AUROC against both targets, recall by group, and propensity validation. | Figures 2C, 3, 4, 5; Tables 8, 13, 16, 19, 23–26 |
+| `sensitivity_inputs.py` | Anemia definitions without hemoglobinopathy codes, second abnormal values, and mean corpuscular volume. | Tables 5, 12, 27 |
 | `sensitivity_models.py` | Stricter-threshold targets and the models on 67 columns. | Tables 21, 22 |
-| `sensitivity_describe.py` | Recognition at stricter thresholds, by severity, after abnormal primary-care values, by anemia subgroup, without hemoglobinopathy evidence, and by GP data supplier. | Tables 5, 6, 13, 20, 21, 27 |
+| `sensitivity_describe.py` | Recognition at stricter thresholds, by severity, after abnormal primary-care values, by anemia subgroup, without hemoglobinopathy evidence, and by GP data supplier. | Tables 5, 6, 12, 20, 21, 27 |
 | `sensitivity_evaluate.py` | Operating points, net benefit, stricter thresholds, feature sets, and selection within GP data supplier. | Tables 17, 18, 20, 21, 22 |
 | `render_design.py`, `render_paper.py` | Draw Figure 1 and render Figures 2–5 and the tables. | |
 
