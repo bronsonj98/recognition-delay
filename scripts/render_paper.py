@@ -66,25 +66,59 @@ for cond, r in primary.iterrows():
                  pct(r.ci_1y), intv(r.ci_5y, r.lo_5y, r.hi_5y, 100, 0) + r'\%'])
 table('burden', pd.DataFrame(rows, columns=['Condition', 'Assay-positive', 'Unrecorded', '1 y', '5 y [95\\% CI]']), colfmt='@{}lrrrr@{}')
 
-# ---------------------------------------------------------------- Figure 2: recognition, follow-up, recording propensity
+# ---------------------------------------------------------------- Figure 2: recognition, follow-up, recording propensity, groups
+# Top row (incomplete and slow recording): A recognition curves, B follow-up of never-recognized participants.
+# Bottom row (selective recording): C recording propensity, D five-year recognition by group.
 sf = read('recognition_strata_full')
-W, H = TEXTWIDTH, 3.47
+W, H = TEXTWIDTH, 3.44
 fig = figure(W, H)
-XL1, XL2, XR = .42, 2.98, 6.4                  # left edges of the axes in the two columns; right edge
-Y1, H1, Y2, H2 = 1.98, 1.15, .34, 1.0          # bottom and height of the axes in rows 1 and 2
-axA = axes(fig, XL1, Y1, 1.88, H1)
-axB = axes(fig, XL2, Y1, XR - XL2, H1)
-axC = axes(fig, XL1, Y2, 1.3, H2)
-GD = .18; WD = (XR - XL2 - 2 * GD) / 3
-axD = [axes(fig, XL2 + j * (WD + GD), Y2, WD, H2) for j in range(3)]
+XL1, XL2, XR = .42, 3.6, 6.45                  # left edges of the axes in the two columns; right edge
+WL = 2.4                                       # width of the left column's axes
+Y1, H1, Y2, H2 = 2.1, 1.1, .5, 1.0             # bottom and height of the axes in rows 1 and 2
+axA = axes(fig, XL1, Y1, WL, H1)
+axB = axes(fig, XL2, Y1, 1.45, H1)
+GC = .12; WC = (WL - 2 * GC) / 3
+axC = [axes(fig, XL1 + j * (WC + GC), Y2, WC, H2) for j in range(3)]
+axD = axes(fig, XL2, Y2, XR - XL2, H2)
 for cond in PRIMARY:
     d = c[c.condition.eq(cond) & c.scope.eq('linked') & c.years.le(6.0001)]
     axA.fill_between(d.years, 100 * d.lo, 100 * d.hi, color=COND[cond], alpha=.2, lw=0)
-    axA.plot(d.years, 100 * d.ci, color=COND[cond], lw=1.3)
+    axA.plot(d.years, 100 * d.ci, color=COND[cond], lw=1.3, label=NAMES[cond])
 axA.axvline(5, color='.5', lw=.7, ls='--')
 axA.set(xlim=(0, 6), ylim=(0, 100), xticks=[0, 2, 4, 6], yticks=[0, 25, 50, 75, 100],
         xlabel='Years since enrollment', ylabel='Recognized (%)')
 axA.grid(axis='y')
+axA.legend(loc='upper left', handlelength=1.5, borderaxespad=.2, labelspacing=.25)
+dd = decomp.set_index('condition')
+segs = [('abnormal_uncoded_fraction_of_never', 'Abnormal value', '.25'),
+        ('normal_retests_fraction_of_never', 'Normal retests', '.6'),
+        ('never_retested_fraction_of_never', 'No retest', '.88')]
+for i, cond in enumerate(PRIMARY):
+    bottom = 0
+    for col, lab, colr in segs:
+        v = 100 * dd.loc[cond, col]
+        axB.bar(i, v, bottom=bottom, width=.6, color=colr, edgecolor='k', lw=.5)
+        if cond == 'anaemia':
+            axB.text(2.4, bottom + v / 2, lab, ha='left', va='center', fontsize=7, clip_on=False)
+        bottom += v
+axB.set(xlim=(-.5, 2.5), ylim=(0, 100), yticks=[0, 25, 50, 75, 100], xticks=range(3), ylabel='Never recognized (%)')
+axB.set_xticklabels(['Diabetes', 'CKD', 'Anemia'])
+for j, cond in enumerate(PRIMARY):
+    ax = axC[j]
+    d = cal[cal.condition.eq(cond) & cal.reference.eq('assay')]
+    r = pr[pr.condition.eq(cond) & pr.reference.eq('assay')].iloc[0]
+    ax.plot([0, 1], [0, 100], color='.7', lw=.7)
+    ax.axhline(100 * r.recorded_share, color='.35', ls='--', lw=.8)
+    ax.plot(d.predicted, 100 * d.observed, '-', color=COND[cond], lw=1)
+    ax.plot(d.predicted, 100 * d.observed, 'o', color=COND[cond], ms=2.6, ls='', **EDGE)
+    ax.set(xlim=(0, 1), ylim=(0, 100), xticks=[0, .5, 1], yticks=[0, 50, 100])
+    ax.set_xticklabels(['0', '0.5', '1'])
+    if j:
+        ax.set_yticklabels([])
+    ax.text(.97, 4, f'AUROC\n{r.auroc:.2f}', ha='right', va='bottom', fontsize=6.5, linespacing=1.1)
+    ax.set_title(NAMES[cond], pad=3, fontsize=7)
+axC[0].set_ylabel('With prior record (%)')
+axC[1].set_xlabel('Predicted recording propensity')
 order = [('Deprivation', ['Q1', 'Q2', 'Q3', 'Q4', 'Q5']), ('Sex', ['Women', 'Men']), ('Ethnicity', ['White', 'Non-white']),
          ('Age', ['<55', '55-64', '65+']), ('Tested', ['No', 'Yes'])]
 x = 0; ticks = []; labels = []; seps = []; heads = []
@@ -96,51 +130,18 @@ for group, levels in order:
             if len(r) == 0:
                 continue
             r = r.iloc[0]
-            axB.errorbar(x + (k - 1) * .26, 100 * r.ci5, yerr=[[100 * (r.ci5 - r.lo)], [100 * (r.hi - r.ci5)]], fmt='o', ms=3.2,
-                         color=COND[cond], elinewidth=.8, capsize=1.5, capthick=.8, **EDGE)
+            axD.errorbar(x + (k - 1) * .26, 100 * r.ci5, yerr=[[100 * (r.ci5 - r.lo)], [100 * (r.hi - r.ci5)]], fmt='o', ms=2.8,
+                         color=COND[cond], elinewidth=.8, capsize=1.3, capthick=.8, **EDGE)
         ticks.append(x); labels.append(lv); x += 1
     heads.append(((start + x - 1) / 2, group)); seps.append(x - .25); x += .5
 for s_ in seps[:-1]:
-    axB.axvline(s_, color='.85', lw=.7)
+    axD.axvline(s_, color='.85', lw=.7)
 for xc, gname in heads:
-    axB.text(xc, 1.03, gname, ha='center', va='bottom', fontsize=7, transform=axB.get_xaxis_transform())
-axB.set(xticks=ticks, ylim=(0, 100), xlim=(-.6, x - 1.5 + .6), yticks=[0, 25, 50, 75, 100], ylabel='Recognized by 5 y (%)')
-axB.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor')
-axB.grid(axis='y')
-fig.legend(handles=[Line2D([0], [0], color=COND[cd], marker='o', ms=3.2, lw=1.3, label=NAMES[cd], **EDGE) for cd in PRIMARY],
-           loc='upper center', bbox_to_anchor=((XL2 + XR) / 2 / W, 1), ncol=3, handlelength=1.8, columnspacing=1.6,
-           borderaxespad=0, borderpad=.1)
-dd = decomp.set_index('condition')
-segs = [('abnormal_uncoded_fraction_of_never', 'Abnormal value', '.25'),
-        ('normal_retests_fraction_of_never', 'Normal retests', '.6'),
-        ('never_retested_fraction_of_never', 'No retest', '.88')]
-for i, cond in enumerate(PRIMARY):
-    bottom = 0
-    for col, lab, colr in segs:
-        v = 100 * dd.loc[cond, col]
-        axC.bar(i, v, bottom=bottom, width=.6, color=colr, edgecolor='k', lw=.5)
-        if cond == 'anaemia':
-            axC.text(2.4, bottom + v / 2, lab, ha='left', va='center', fontsize=7, clip_on=False)
-        bottom += v
-axC.set(xlim=(-.5, 2.5), ylim=(0, 100), yticks=[0, 25, 50, 75, 100], xticks=range(3), ylabel='Never recognized (%)')
-axC.set_xticklabels(['Diabetes', 'CKD', 'Anemia'])
-for j, cond in enumerate(PRIMARY):
-    ax = axD[j]
-    d = cal[cal.condition.eq(cond) & cal.reference.eq('assay')]
-    r = pr[pr.condition.eq(cond) & pr.reference.eq('assay')].iloc[0]
-    ax.plot([0, 1], [0, 100], color='.7', lw=.7)
-    ax.axhline(100 * r.recorded_share, color='.35', ls='--', lw=.8)
-    ax.plot(d.predicted, 100 * d.observed, '-', color=COND[cond], lw=1)
-    ax.plot(d.predicted, 100 * d.observed, 'o', color=COND[cond], ms=3, ls='', **EDGE)
-    ax.set(xlim=(0, 1), ylim=(0, 100), xticks=[0, .5, 1], yticks=[0, 50, 100])
-    ax.set_xticklabels(['0', '0.5', '1'])
-    if j:
-        ax.set_yticklabels([])
-    ax.text(.97, 4, f'AUROC {r.auroc:.2f}', ha='right', va='bottom', fontsize=7)
-    ax.set_title(NAMES[cond], pad=3)
-axD[0].set_ylabel('With prior record (%)')
-axD[1].set_xlabel('Predicted recording propensity')
-TOP1, TOP2 = H - .02, Y2 + H2 + .25
+    axD.text(xc, 1.03, gname, ha='center', va='bottom', fontsize=6.5, transform=axD.get_xaxis_transform())
+axD.set(xticks=ticks, ylim=(0, 100), xlim=(-.6, x - 1.5 + .6), yticks=[0, 25, 50, 75, 100], ylabel='Recognized by 5 y (%)')
+axD.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor', fontsize=6.5)
+axD.grid(axis='y')
+TOP1, TOP2 = H - .02, Y2 + H2 + .27
 for s_, xx, yy in [('A', 0, TOP1), ('B', XL2 - .45, TOP1), ('C', 0, TOP2), ('D', XL2 - .45, TOP2)]:
     letter(fig, xx, yy, s_)
 check_layout(fig, 'Figure 2')
