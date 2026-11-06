@@ -277,7 +277,7 @@ for cond in PRIMARY:
         name = {'diabetes': 'Diabetes', 'ckd_confirmed': 'CKD', 'anaemia': 'Anemia'}[cond]
         rows.append([name, w.replace('-', '--'), f'{int(d.n.fillna(0).sum()):,}'] + cells)
 table('composition', pd.DataFrame(rows, columns=['Recognized condition', 'Years to recognition', 'Recognitions', 'Disease range at enrollment', 'Intermediate', 'Normal']),
-      'Enrollment value at first recognition in each window after enrollment, among study-cohort participants without a prior record. The kidney rows classify creatinine eGFR alone ($<60$, 60--89, or $\\geq90$). Intermediate HbA1c is 42--47.9 mmol/mol; anemia has no intermediate state.', 'tab:composition')
+      'Enrollment value of participants first recognized in each window after enrollment, among study-cohort participants without a prior record. The kidney rows classify creatinine eGFR alone ($<60$, 60--89, or $\\geq90$). Intermediate HbA1c is 42--47.9 mmol/mol; anemia has no intermediate state.', 'tab:composition')
 sc = read('stratum_contrasts'); rows = []
 short = {'Women vs. men': 'Women vs. men', 'Most vs. least deprived quintile': 'Most vs. least deprived', 'Non-white vs. white': 'Non-white vs. white',
          'Age 65+ vs. <55': 'Age 65+ vs. $<$55', 'Tested vs. not tested in prior year': 'Prior-year testing, yes vs. no'}
@@ -389,7 +389,7 @@ for cond, lab in [('diabetes', 'HbA1c >= 53'), ('anaemia', 'hemoglobin < 11'), (
             row += ['--', '--']
         rows.append(row)
 table('strict', pd.DataFrame(rows, columns=['Condition', 'Threshold', 'Assay-positive', 'Unrecorded', '5-y rec. (\\%)', 'Rec. vs. meas.', 'Fewer']),
-      'Stricter thresholds. Case finding uses the same held-out unrecorded participants and the same models as the primary analysis (boosting, top 10\\% tested), scored against the stricter value; the measured label is the primary one. Kidney function at the stricter threshold has too few unrecorded participants for case finding. Rec.\\ vs.\\ meas.: found per 1,000 tested with the recorded and measured labels.', 'tab:strict', size='footnotesize')
+      'Stricter thresholds. The models are those of the primary analysis, with the measured label at the primary threshold, and are scored against the stricter value in the same held-out unrecorded participants (boosting, top 10\\% tested). Kidney function at the stricter threshold has too few unrecorded participants for case finding. Rec.\\ vs.\\ meas.: found per 1,000 tested with the recorded and measured labels.', 'tab:strict', size='footnotesize')
 cl = read('confirmation_landmarks', SENS_OUT); rows = []
 for r in cl.itertuples():
     rows.append([NAMES[r.condition], {'first abnormal value': 'First abnormal value', 'second abnormal value >= 90 days later': 'Second abnormal value, $\\geq$90 days later'}[r.landmark],
